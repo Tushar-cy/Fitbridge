@@ -1,0 +1,349 @@
+{
+  "info": {
+    "name": "FitBridge API",
+    "description": "Complete FitBridge backend API collection — 35 routes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "trainerId", "value": "" },
+    { "key": "sessionId", "value": "" },
+    { "key": "bookingId", "value": "" },
+    { "key": "postId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Trainee)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Trainee\",\n  \"email\": \"trainee@test.com\",\n  \"password\": \"Test@12345\",\n  \"role\": \"trainee\"\n}" }
+          }
+        },
+        {
+          "name": "Register (Trainer)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Test Trainer\",\n  \"email\": \"trainer@test.com\",\n  \"password\": \"Test@12345\",\n  \"role\": \"trainer\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Seeded Trainer)",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if(json.data?.accessToken) pm.collectionVariables.set('accessToken', json.data.accessToken);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"arjun@fitbridge.dev\",\n  \"password\": \"Fitbridge@123\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Seeded Trainee)",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if(json.data?.accessToken) pm.collectionVariables.set('accessToken', json.data.accessToken);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"alex.j@test.com\",\n  \"password\": \"Fitbridge@123\"\n}" }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": { "method": "POST", "url": "{{baseUrl}}/api/auth/refresh-token" }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/forgot-password",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"email\": \"alex.j@test.com\" }" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trainers",
+      "item": [
+        {
+          "name": "List Trainers (all)",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if(json.data?.[0]?.trainer?._id) pm.collectionVariables.set('trainerId', json.data[0].trainer._id);"] } }],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/trainers" }
+        },
+        {
+          "name": "List Trainers (filters)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/trainers?specialisation=yoga&maxPrice=2000&minRating=4&page=1&limit=5" }
+        },
+        {
+          "name": "List Trainers (search)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/trainers?search=yoga+Mumbai" }
+        },
+        {
+          "name": "Get Trainer by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/trainers/{{trainerId}}" }
+        },
+        {
+          "name": "Get Trainer Availability",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/trainers/{{trainerId}}/availability" }
+        },
+        {
+          "name": "Get Trainer Reviews",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/trainers/{{trainerId}}/reviews" }
+        },
+        {
+          "name": "Update Trainer Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/trainers/profile",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"bio\": \"Updated bio — 10 years of premium coaching.\",\n  \"sessionRate\": 2000\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sessions",
+      "item": [
+        {
+          "name": "Create Session (Trainer)",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if(json.data?._id) pm.collectionVariables.set('sessionId', json.data._id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/sessions",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"personal\",\n  \"mode\": \"online\",\n  \"scheduledAt\": \"2024-05-15T10:00:00.000Z\",\n  \"duration\": 60,\n  \"price\": 1800\n}" }
+          }
+        },
+        {
+          "name": "List My Sessions",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/sessions",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Get Session by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/sessions/{{sessionId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Update Session Status → live",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/sessions/{{sessionId}}/status",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"status\": \"live\" }" }
+          }
+        },
+        {
+          "name": "Update Session Status → completed",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/sessions/{{sessionId}}/status",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"status\": \"completed\" }" }
+          }
+        },
+        {
+          "name": "Delete Session",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/sessions/{{sessionId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if(json.data?._id) pm.collectionVariables.set('bookingId', json.data._id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/bookings",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"sessionId\": \"{{sessionId}}\" }" }
+          }
+        },
+        {
+          "name": "List My Bookings",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/bookings",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Get Booking by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/bookings/{{bookingId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/bookings/{{bookingId}}/cancel",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feed",
+      "item": [
+        {
+          "name": "Create Post",
+          "event": [{ "listen": "test", "script": { "exec": ["const json = pm.response.json();", "if(json.data?._id) pm.collectionVariables.set('postId', json.data._id);"] } }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/feed",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"post\",\n  \"mediaUrl\": \"https://picsum.photos/seed/test/600/750\",\n  \"caption\": \"Test post from Postman! #FitBridge\"\n}" }
+          }
+        },
+        {
+          "name": "Get Feed (paginated)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/feed?page=1&limit=10",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/feed/{{postId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Toggle Like",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/feed/{{postId}}/like",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Add Comment",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/feed/{{postId}}/comment",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"text\": \"Great post! Really motivating 🔥\" }" }
+          }
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/feed/{{postId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/reviews",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"trainerId\": \"{{trainerId}}\",\n  \"sessionId\": \"{{sessionId}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent session! Very professional and motivating.\"\n}" }
+          }
+        },
+        {
+          "name": "Get Trainer Reviews",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/reviews/trainer/{{trainerId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/users/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Alex Johnson Updated\",\n  \"fitnessGoal\": \"build muscle\"\n}" }
+          }
+        },
+        {
+          "name": "Update Biometrics",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/users/me/biometrics",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"height\": 175,\n  \"weightRange\": \"72-76\",\n  \"bodyShape\": \"mesomorph\",\n  \"age\": 28\n}" }
+          }
+        },
+        {
+          "name": "Get Progress",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/me/progress",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+        }
+      ]
+    }
+  ]
+}
